@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Maths Test — International, CBSE &amp; ICSE</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card2: #16213b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --good: #4ade80;
+    --bad: #f87171;
+    --warn: #fbbf24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 24px 14px;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { width: 100%; max-width: 760px; }
+  header { text-align: center; margin-bottom: 24px; }
+  header h1 {
+    font-size: clamp(1.5rem, 6vw, 2.2rem);
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  header p { color: var(--muted); margin-top: 6px; font-size: 0.95rem; }
+  .card {
+    background: var(--card);
+    border: 1px solid #334155;
+    border-radius: 14px;
+    padding: clamp(16px, 4vw, 28px);
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  .board-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 18px; }
+  .board-btn {
+    padding: 18px 10px;
+    border-radius: 12px;
+    border: 2px solid #334155;
+    background: var(--card2);
+    color: var(--text);
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .12s, border-color .12s;
+  }
+  .board-btn small { display: block; font-weight: 400; font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+  .board-btn:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .grade-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)); gap: 10px; margin-top: 18px; }
+  .grade-btn {
+    padding: 14px 6px;
+    border-radius: 10px;
+    border: 2px solid #334155;
+    background: var(--card2);
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform .12s, border-color .12s, background .12s;
+  }
+  .grade-btn:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .grade-btn.selected { background: var(--accent); color: #082f49; border-color: var(--accent); }
+  .actions { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+  button.primary {
+    flex: 1;
+    min-width: 140px;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    color: #0b1120;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  button.primary:disabled { opacity: .4; cursor: not-allowed; }
+  button.ghost {
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 1px solid #475569;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+  .qmeta { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.85rem; margin-bottom: 10px; flex-wrap: wrap; gap: 6px; }
+  .progress { height: 8px; background: #0b1120; border-radius: 99px; overflow: hidden; margin-bottom: 18px; }
+  .progress > div { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0; transition: width .25s; }
+  .question { font-size: clamp(1.05rem, 4.5vw, 1.3rem); font-weight: 600; margin-bottom: 18px; line-height: 1.5; }
+  .opt {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border: 2px solid #334155;
+    background: var(--card2);
+    color: var(--text);
+    font-size: 1.02rem;
+    cursor: pointer;
+    transition: border-color .12s, background .12s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .opt:hover { border-color: var(--accent); }
+  .opt.picked { border-color: var(--accent); background: rgba(56,189,248,.12); }
+  .opt.correct { border-color: var(--good); background: rgba(74,222,128,.12); }
+  .opt.wrong { border-color: var(--bad); background: rgba(248,113,113,.12); }
+  .score-big { font-size: clamp(2.2rem, 10vw, 3rem); font-weight: 800; text-align: center; }
+  .verdict { text-align: center; font-size: 1.1rem; margin: 8px 0 18px; }
+  .review-item { border-top: 1px solid #334155; padding: 12px 0; font-size: 0.95rem; }
+  .review-item .q { font-weight: 600; margin-bottom: 4px; }
+  .ok { color: var(--good); }
+  .no { color: var(--bad); }
+  .tag { display: inline-block; font-size: 0.72rem; padding: 2px 8px; border-radius: 99px; background: #334155; color: var(--muted); margin-left: 6px; vertical-align: middle; }
+  .hidden { display: none; }
+  @media (max-width: 480px) {
+    body { padding: 16px 10px; }
+    .grade-grid { grid-template-columns: repeat(3, 1fr); }
+    .board-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🧮 Maths Test</h1>
+    <p>Choose your board, pick your class, take the test!</p>
+  </header>
+
+  <!-- STEP 1: Board selection -->
+  <section id="board-screen" class="card">
+    <h2>Step 1 — Choose your board / mode</h2>
+    <div class="board-grid">
+      <button class="board-btn" data-board="intl">🌍 International<small>General curriculum, Grades 1–12</small></button>
+      <button class="board-btn" data-board="cbse">🇮🇳 CBSE<small>NCERT syllabus, Classes 1–12</small></button>
+      <button class="board-btn" data-board="icse">🇮🇳 ICSE<small>CISCE syllabus, Classes 1–10</small></button>
+    </div>
+  </section>
+
+  <!-- STEP 2: Grade selection -->
+  <section id="grade-screen" class="card hidden">
+    <h2>Step 2 — Select your <span id="grade-label">grade</span></h2>
+    <div class="grade-grid" id="grade-grid"></div>
+    <div class="actions">
+      <button class="ghost" id="back-to-boards">← Change board</button>
+      <button class="primary" id="start-btn" disabled>Start Test ▶</button>
+    </div>
+  </section>
+
+  <!-- STEP 3: Quiz -->
+  <section id="quiz-screen" class="card hidden">
+    <div class="qmeta">
+      <span id="q-counter">Question 1 of 10</span>
+      <span id="q-board"></span>
+    </div>
+    <div class="progress"><div id="progress-bar"></div></div>
+    <div class="question" id="q-text"></div>
+    <div id="q-options"></div>
+    <div class="actions">
+      <button class="primary" id="next-btn" disabled>Next ▶</button>
+    </div>
+  </section>
+
+  <!-- STEP 4: Results -->
+  <section id="results-screen" class="card hidden">
+    <div class="score-big" id="score-big"></div>
+    <div class="verdict" id="verdict"></div>
+    <div class="actions">
+      <button class="primary" id="retry-btn">🔄 Try Again</button>
+      <button class="ghost" id="change-btn">Change board / class</button>
+    </div>
+    <h3 style="margin:22px 0 6px;">Answer review</h3>
+    <div id="review"></div>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+   QUESTION BANKS
+   Each grade has 10 questions: { q, options[4], answer(index) }
+   Boards: intl (1-12), cbse (1-12), icse (1-10)
+   ============================================================ */
+const BANKS = {
+  intl: {
+    1: [
+      {q:"What is 3 + 4?",o:["6","7","8","9"],a:1},
+      {q:"What is 10 − 6?",o:["3","4","5","6"],a:1},
+      {q:"Which number comes after 19?",o:["18","20","21","17"],a:1},
+      {q:"How many sides does a triangle have?",o:["2","3","4","5"],a:1},
+      {q:"What is 2 + 2 + 2?",o:["4","5","6","8"],a:2},
+      {q:"Which is the biggest number?",o:["45","54","44","40"],a:1},
+      {q:"What is 9 − 5?",o:["4","3","5","6"],a:0},
+      {q:"Count: 🍎🍎🍎🍎🍎 — how many apples?",o:["4","5","6","7"],a:1},
+      {q:"What is 1 more than 8?",o:["7","8","9","10"],a:2},
+      {q:"Which shape is round?",o:["Square","Triangle","Circle","Rectangle"],a:2}
+    ],
+    2: [
+      {q:"What is 15 + 7?",o:["21","22","23","24"],a:1},
+      {q:"What is 20 − 13?",o:["6","7","8","9"],a:1},
+      {q:"What is 5 × 2?",o:["7","10","12","15"],a:1},
+      {q:"Which number is even?",o:["7","13","18","21"],a:2},
+      {q:"What is half of 16?",o:["6","7","8","9"],a:2},
+      {q:"How many minutes in one hour?",o:["30","60","90","100"],a:1},
+      {q:"What is 34 + 10?",o:["44","43","54","24"],a:0},
+      {q:"Which coin is worth the most?",o:["1 cent","5 cents","10 cents","25 cents"],a:3},
+      {q:"What is 3 × 3?",o:["6","8","9","12"],a:2},
+      {q:"What comes next: 2, 4, 6, 8, …?",o:["9","10","11","12"],a:1}
+    ],
+    3: [
+      {q:"What is 7 × 6?",o:["36","40","42","48"],a:2},
+      {q:"What is 56 ÷ 8?",o:["6","7","8","9"],a:1},
+      {q:"Round 47 to the nearest ten.",o:["40","45","50","60"],a:2},
+      {q:"What is 125 + 236?",o:["351","361","356","461"],a:1},
+      {q:"What is 1/2 of 20?",o:["5","10","15","20"],a:1},
+      {q:"How many centimetres in 1 metre?",o:["10","100","1000","60"],a:1},
+      {q:"What is 9 × 4?",o:["32","34","36","38"],a:2},
+      {q:"Which fraction is bigger?",o:["1/3","1/2","1/4","1/5"],a:1},
+      {q:"What is 300 − 175?",o:["125","135","115","225"],a:0},
+      {q:"A rectangle has length 5 and width 3. What is its area?",o:["8","15","16","30"],a:1}
+    ],
+    4: [
+      {q:"What is 12 × 11?",o:["121","132","144","122"],a:1},
+      {q:"What is 144 ÷ 12?",o:["10","11","12","14"],a:2},
+      {q:"Write 0.5 as a fraction.",o:["1/5","1/2","1/4","5/10 only"],a:1},
+      {q:"What is the perimeter of a square with side 7?",o:["14","21","28","49"],a:2},
+      {q:"What is 2,456 + 1,389?",o:["3,845","3,745","3,835","4,845"],a:0},
+      {q:"Which is a factor of 24?",o:["5","7","9","8"],a:3},
+      {q:"What is 3/4 of 32?",o:["20","22","24","26"],a:2},
+      {q:"How many grams in 2.5 kilograms?",o:["250","2,500","25,000","205"],a:1},
+      {q:"What is 15 × 4 − 10?",o:["40","50","60","70"],a:1},
+      {q:"Which angle is a right angle?",o:["45°","90°","120°","180°"],a:1}
+    ],
+    5: [
+      {q:"What is 25 × 16?",o:["300","350","400","450"],a:2},
+      {q:"What is 3/5 + 1/5?",o:["4/10","4/5","2/5","1"],a:1},
+      {q:"What is the area of a rectangle 9 cm by 4 cm?",o:["13 cm²","26 cm²","36 cm²","32 cm²"],a:2},
+      {q:"Write 3/4 as a decimal.",o:["0.25","0.5","0.75","0.34"],a:2},
+      {q:"What is the LCM of 4 and 6?",o:["8","12","24","6"],a:1},
+      {q:"What is 1000 ÷ 8?",o:["120","125","130","115"],a:1},
+      {q:"A triangle has angles 90° and 45°. The third angle is…",o:["35°","40°","45°","55°"],a:2},
+      {q:"What is 7² (7 squared)?",o:["14","42","49","56"],a:2},
+      {q:"Which number is prime?",o:["21","27","29","33"],a:2},
+      {q:"What is 2.5 × 4?",o:["8","10","12","100"],a:1}
+    ],
+    6: [
+      {q:"What is −5 + 8?",o:["−3","3","13","−13"],a:1},
+      {q:"Simplify: 2x + 3x",o:["5x","6x","5x²","23x"],a:0},
+      {q:"What is 15% of 200?",o:["15","20","30","45"],a:2},
+      {q:"Ratio 6:9 simplifies to…",o:["1:2","2:3","3:4","6:9"],a:1},
+      {q:"What is the mean of 4, 8, 6, 10, 2?",o:["5","6","7","8"],a:1},
+      {q:"Solve: x + 7 = 15",o:["6","7","8","9"],a:2},
+      {q:"What is the area of a triangle with base 10 and height 6?",o:["30","60","16","26"],a:0},
+      {q:"What is 5/6 − 1/3?",o:["1/2","1/3","4/3","2/3"],a:0},
+      {q:"How many degrees in a full circle?",o:["90°","180°","270°","360°"],a:3},
+      {q:"What is 0.4 × 0.3?",o:["0.12","1.2","0.07","0.43"],a:0}
+    ],
+    7: [
+      {q:"Solve: 3x − 4 = 11",o:["3","4","5","6"],a:2},
+      {q:"What is (−4) × (−7)?",o:["−28","28","−11","11"],a:1},
+      {q:"What is the circumference of a circle with radius 7? (use π ≈ 22/7)",o:["22","44","154","88"],a:1},
+      {q:"Simplify: 4² × 4³",o:["4⁵","4⁶","16⁵","4¹"],a:0},
+      {q:"A shirt costs $40 and is 25% off. New price?",o:["$10","$25","$30","$35"],a:2},
+      {q:"What is the probability of rolling a 3 on a fair die?",o:["1/2","1/3","1/6","1/4"],a:2},
+      {q:"Expand: 3(x + 5)",o:["3x + 5","3x + 15","x + 15","3x + 8"],a:1},
+      {q:"What is the supplement of 65°?",o:["25°","115°","125°","295°"],a:1},
+      {q:"What is 2/3 of 90?",o:["30","45","60","75"],a:2},
+      {q:"Which is an irrational number?",o:["0.5","√2","3/4","7"],a:1}
+    ],
+    8: [
+      {q:"Solve: 2(x − 3) = 10",o:["6","7","8","9"],a:2},
+      {q:"What is the slope of y = 3x + 2?",o:["2","3","x","5"],a:1},
+      {q:"What is √144?",o:["10","11","12","14"],a:2},
+      {q:"Factor: x² + 5x + 6",o:["(x+1)(x+6)","(x+2)(x+3)","(x−2)(x−3)","(x+5)(x+1)"],a:1},
+      {q:"Volume of a cube with side 4?",o:["16","32","64","12"],a:2},
+      {q:"What is 3⁻²?",o:["−9","−6","1/9","1/6"],a:2},
+      {q:"In a right triangle, legs are 3 and 4. Hypotenuse?",o:["5","6","7","12"],a:0},
+      {q:"Scientific notation for 45,000?",o:["4.5 × 10³","4.5 × 10⁴","45 × 10³","0.45 × 10⁵"],a:1},
+      {q:"Median of 3, 7, 9, 12, 15?",o:["7","9","12","10"],a:1},
+      {q:"If y = 2x + 1, what is y when x = 4?",o:["7","8","9","10"],a:2}
+    ],
+    9: [
+      {q:"Solve: x² = 49",o:["7 only","−7 only","±7","49"],a:2},
+      {q:"Distance between (0,0) and (3,4)?",o:["5","7","12","25"],a:0},
+      {q:"What is the quadratic formula's discriminant?",o:["b² − 4ac","−b ± √…","2a","b² + 4ac"],a:0},
+      {q:"Simplify: √50",o:["5√2","2√5","25√2","10√5"],a:0},
+      {q:"Sin 30° = ?",o:["1/2","√3/2","1","√2/2"],a:0},
+      {q:"Roots of x² − 5x + 6 = 0?",o:["1 and 6","2 and 3","−2 and −3","5 and 1"],a:1},
+      {q:"Sum of interior angles of a pentagon?",o:["360°","540°","720°","900°"],a:1},
+      {q:"What is log₁₀(1000)?",o:["2","3","10","100"],a:1},
+      {q:"Slope of the line through (1,2) and (3,8)?",o:["2","3","4","6"],a:1},
+      {q:"Surface area of a sphere with r = 3? (4πr²)",o:["12π","24π","36π","48π"],a:2}
+    ],
+    10: [
+      {q:"Solve: 2x² − 8 = 0",o:["x = 2","x = ±2","x = 4","x = ±4"],a:1},
+      {q:"Cos 60° = ?",o:["1/2","√3/2","1","0"],a:0},
+      {q:"If f(x) = x² + 1, what is f(3)?",o:["7","9","10","12"],a:2},
+      {q:"Arithmetic sequence 2, 5, 8, … — 10th term?",o:["27","29","30","32"],a:1},
+      {q:"What is ⁵C₂ (5 choose 2)?",o:["10","20","5","25"],a:0},
+      {q:"Vertex of y = x² − 4x + 3?",o:["(2, −1)","(−2, 1)","(4, 3)","(2, 1)"],a:0},
+      {q:"Tan 45° = ?",o:["0","1","√3","1/√3"],a:1},
+      {q:"Geometric sequence 3, 6, 12, … — common ratio?",o:["2","3","4","6"],a:0},
+      {q:"log₂(32) = ?",o:["4","5","6","16"],a:1},
+      {q:"Equation of a circle centred at origin, r = 5?",o:["x² + y² = 5","x² + y² = 25","x + y = 25","x² − y² = 25"],a:1}
+    ],
+    11: [
+      {q:"Derivative of x³?",o:["3x²","x²","3x","x⁴/4"],a:0},
+      {q:"lim(x→0) sin(x)/x = ?",o:["0","1","∞","undefined"],a:1},
+      {q:"∫ 2x dx = ?",o:["x² + C","2x² + C","x²/2 + C","2 + C"],a:0},
+      {q:"Derivative of sin(x)?",o:["cos(x)","−cos(x)","−sin(x)","tan(x)"],a:0},
+      {q:"What is i² (imaginary unit)?",o:["1","−1","i","−i"],a:1},
+      {q:"Sum of infinite series 1 + 1/2 + 1/4 + …?",o:["1.5","2","∞","1"],a:1},
+      {q:"Derivative of eˣ?",o:["eˣ","xeˣ⁻¹","ln x","e"],a:0},
+      {q:"If A is a 2×2 matrix with det = 0, A is…",o:["invertible","singular","symmetric","identity"],a:1},
+      {q:"lim(x→∞) 1/x = ?",o:["1","∞","0","−1"],a:2},
+      {q:"∫₀¹ x dx = ?",o:["1","1/2","2","1/4"],a:1}
+    ],
+    12: [
+      {q:"Derivative of ln(x)?",o:["1/x","x","eˣ","ln x"],a:0},
+      {q:"∫ eˣ dx = ?",o:["eˣ + C","xeˣ + C","ln x + C","eˣ⁻¹ + C"],a:0},
+      {q:"Second derivative of x⁴?",o:["4x³","12x²","24x","x²"],a:1},
+      {q:"d/dx [sin(2x)] = ?",o:["cos(2x)","2cos(2x)","−2cos(2x)","2sin(2x)"],a:1},
+      {q:"Area under y = x from 0 to 4?",o:["4","8","16","2"],a:1},
+      {q:"If det(A) = 3 for 2×2 matrix A, det(2A) = ?",o:["6","9","12","3"],a:2},
+      {q:"lim(x→0) (eˣ − 1)/x = ?",o:["0","1","e","∞"],a:1},
+      {q:"∫ 1/x dx = ?",o:["ln|x| + C","1/x² + C","x + C","eˣ + C"],a:0},
+      {q:"Critical points of f(x) = x² − 6x occur at x = ?",o:["0","3","6","−3"],a:1},
+      {q:"Modulus of complex number 3 + 4i?",o:["5","7","25","1"],a:0}
+    ]
+  },
+
+  /* ================= CBSE (NCERT) ================= */
+  cbse: {
+    1: [
+      {q:"What is 5 + 3?",o:["7","8","9","6"],a:1},
+      {q:"Which number is smallest?",o:["12","9","15","21"],a:1},
+      {q:"What comes just before 50?",o:["48","49","51","40"],a:1},
+      {q:"How many corners does a square have?",o:["3","4","5","0"],a:1},
+      {q:"What is 10 − 4?",o:["5","6","7","8"],a:1},
+      {q:"Write in words: 17",o:["Seven","Seventeen","Seventy","Eleven"],a:1},
+      {q:"Which is longer: 1 metre or 1 centimetre?",o:["1 cm","1 m","Both equal","Can't say"],a:1},
+      {q:"What is 6 + 6?",o:["11","12","13","14"],a:1},
+      {q:"How many days in a week?",o:["5","6","7","8"],a:2},
+      {q:"What is the shape of a ball?",o:["Cube","Cone","Sphere","Cylinder"],a:2}
+    ],
+    2: [
+      {q:"What is 25 + 36?",o:["51","61","71","60"],a:1},
+      {q:"What is 4 × 3?",o:["7","12","9","14"],a:1},
+      {q:"How many paise in 1 rupee?",o:["10","50","100","1000"],a:2},
+      {q:"What is 50 − 25?",o:["20","25","30","35"],a:1},
+      {q:"Which number is odd?",o:["14","22","31","48"],a:2},
+      {q:"How many months in a year?",o:["10","11","12","13"],a:2},
+      {q:"What is double of 15?",o:["20","25","30","35"],a:2},
+      {q:"Complete the pattern: 5, 10, 15, …",o:["18","20","25","30"],a:1},
+      {q:"A line segment has how many end points?",o:["1","2","3","0"],a:1},
+      {q:"What is 8 tens + 5 ones?",o:["58","85","13","80"],a:1}
+    ],
+    3: [
+      {q:"What is 9 × 7?",o:["56","63","72","54"],a:1},
+      {q:"What is 81 ÷ 9?",o:["7","8","9","6"],a:2},
+      {q:"How many millimetres in 1 centimetre?",o:["5","10","100","1000"],a:1},
+      {q:"What is 1/4 of 16?",o:["2","4","8","6"],a:1},
+      {q:"Round 68 to the nearest ten.",o:["60","65","70","80"],a:2},
+      {q:"What is 456 + 378?",o:["834","824","734","844"],a:0},
+      {q:"Perimeter of a square with side 9 cm?",o:["18 cm","27 cm","36 cm","81 cm"],a:2},
+      {q:"Which fraction equals 1/2?",o:["2/3","3/6","2/5","1/3"],a:1},
+      {q:"What time is quarter past 3?",o:["3:15","3:30","3:45","2:45"],a:0},
+      {q:"What is 1000 − 645?",o:["345","355","365","455"],a:1}
+    ],
+    4: [
+      {q:"What is 13 × 12?",o:["144","156","166","146"],a:1},
+      {q:"HCF of 12 and 18?",o:["2","3","6","9"],a:2},
+      {q:"What is 5/8 + 2/8?",o:["7/16","7/8","3/8","10/8"],a:1},
+      {q:"Area of a rectangle 8 m × 5 m?",o:["13 m²","40 m²","26 m²","45 m²"],a:1},
+      {q:"Write 0.75 as a fraction.",o:["3/4","1/4","7/5","5/7"],a:0},
+      {q:"How many sides does a hexagon have?",o:["5","6","7","8"],a:1},
+      {q:"What is 7,500 ÷ 25?",o:["30","300","3,000","250"],a:1},
+      {q:"Which is a multiple of 9?",o:["28","46","54","64"],a:2},
+      {q:"Angle of a straight line?",o:["90°","180°","270°","360°"],a:1},
+      {q:"What is 4.5 + 2.35?",o:["6.85","6.80","7.85","6.35"],a:0}
+    ],
+    5: [
+      {q:"LCM of 6 and 8?",o:["12","24","48","14"],a:1},
+      {q:"What is 3/5 of 100?",o:["30","50","60","75"],a:2},
+      {q:"Volume of a cube of side 3 cm?",o:["9 cm³","18 cm³","27 cm³","6 cm³"],a:2},
+      {q:"Write 7/20 as a decimal.",o:["0.35","0.25","0.7","0.07"],a:0},
+      {q:"Average of 10, 20, 30?",o:["15","20","25","30"],a:1},
+      {q:"What is 12² ?",o:["24","122","144","132"],a:2},
+      {q:"A triangle's angles: 60°, 70°, third?",o:["40°","50°","60°","30°"],a:1},
+      {q:"Simplify: 2/3 × 9/10",o:["3/5","2/5","18/30 only","5/3"],a:0},
+      {q:"How many faces does a cuboid have?",o:["4","6","8","12"],a:1},
+      {q:"What is 36% of 50?",o:["12","18","20","36"],a:1}
+    ],
+    6: [
+      {q:"What is (−8) + 5?",o:["−3","3","−13","13"],a:0},
+      {q:"Ratio of 20 to 50 in simplest form?",o:["1:2","2:5","4:10","5:2"],a:1},
+      {q:"Solve: x − 9 = 16",o:["7","23","25","26"],a:2},
+      {q:"Area of a triangle, base 12 cm, height 5 cm?",o:["60 cm²","30 cm²","17 cm²","34 cm²"],a:1},
+      {q:"Which is a prime number?",o:["51","57","59","69"],a:2},
+      {q:"What is 4.2 ÷ 0.6?",o:["0.7","7","70","6"],a:1},
+      {q:"Perimeter of an equilateral triangle, side 7 cm?",o:["14 cm","21 cm","28 cm","49 cm"],a:1},
+      {q:"Convert 3/8 to a percentage.",o:["37.5%","38%","35%","24%"],a:0},
+      {q:"What is the mean of 5, 10, 15, 20?",o:["10","12.5","15","20"],a:1},
+      {q:"How many edges does a cube have?",o:["6","8","12","10"],a:2}
+    ],
+    7: [
+      {q:"Solve: 2x + 5 = 17",o:["5","6","7","11"],a:1},
+      {q:"What is (−6) × 4?",o:["24","−24","−10","10"],a:1},
+      {q:"Congruent triangles have…",o:["same area only","same shape and size","same perimeter only","equal angles only"],a:1},
+      {q:"What is 3² × 3³?",o:["3⁵","3⁶","9⁵","6⁵"],a:0},
+      {q:"Simple interest on ₹1,000 at 5% p.a. for 2 years?",o:["₹50","₹100","₹150","₹200"],a:1},
+      {q:"Complement of 40°?",o:["40°","50°","60°","140°"],a:1},
+      {q:"Circumference of circle, r = 7 cm (π = 22/7)?",o:["22 cm","44 cm","154 cm","88 cm"],a:1},
+      {q:"Median of 4, 8, 3, 9, 5?",o:["4","5","8","6"],a:1},
+      {q:"Simplify: (a²)³",o:["a⁵","a⁶","a⁸","a⁹"],a:1},
+      {q:"A die is thrown. P(even number)?",o:["1/6","1/3","1/2","2/3"],a:2}
+    ],
+    8: [
+      {q:"Solve: 3(x − 2) = 12",o:["4","5","6","7"],a:2},
+      {q:"What is √169?",o:["11","12","13","14"],a:2},
+      {q:"Factorise: x² + 7x + 12",o:["(x+3)(x+4)","(x+2)(x+6)","(x+1)(x+12)","(x−3)(x−4)"],a:0},
+      {q:"Cube root of 512?",o:["6","7","8","9"],a:2},
+      {q:"Compound interest on ₹1,000 at 10% for 1 year (annual)?",o:["₹100","₹110","₹1,100","₹10"],a:0},
+      {q:"(a + b)² = ?",o:["a² + b²","a² + 2ab + b²","a² − 2ab + b²","2a + 2b"],a:1},
+      {q:"Area of a trapezium: parallel sides 6 & 10, height 4?",o:["32","64","16","40"],a:0},
+      {q:"What is 2⁻³?",o:["−8","−6","1/8","1/6"],a:2},
+      {q:"A quadrilateral's angles sum to…",o:["180°","270°","360°","540°"],a:2},
+      {q:"If 5 pencils cost ₹45, cost of 8 pencils?",o:["₹72","₹80","₹90","₹64"],a:0}
+    ],
+    9: [
+      {q:"Zero of the polynomial x − 5?",o:["−5","0","5","1"],a:2},
+      {q:"In △ABC, if ∠A = 50°, ∠B = 60°, then ∠C = ?",o:["60°","70°","80°","90°"],a:1},
+      {q:"Value of (27)^(1/3)?",o:["3","9","1/3","27"],a:0},
+      {q:"Euclid's geometry is based on…",o:["theorems only","axioms and postulates","experiments","graphs"],a:1},
+      {q:"Area of an equilateral triangle with side a?",o:["(√3/4)a²","(√3/2)a²","a²√3","(1/2)a²"],a:0},
+      {q:"Rationalise: 1/√2",o:["√2/2","2/√2 only","1/2","√2"],a:0},
+      {q:"Point (−3, 4) lies in which quadrant?",o:["I","II","III","IV"],a:1},
+      {q:"If x + y = 10 and x − y = 4, then x = ?",o:["3","6","7","8"],a:2},
+      {q:"Volume of a cylinder, r = 7, h = 10 (π = 22/7)?",o:["1,540 cm³","440 cm³","1,540 cm²","220 cm³"],a:0},
+      {q:"Probability of getting a head in one coin toss?",o:["1","1/2","1/4","0"],a:1}
+    ],
+    10: [
+      {q:"Roots of x² − 7x + 12 = 0?",o:["2 & 6","3 & 4","−3 & −4","1 & 12"],a:1},
+      {q:"10th term of AP: 2, 5, 8, …?",o:["27","29","32","30"],a:1},
+      {q:"sin²θ + cos²θ = ?",o:["0","1","2","tan²θ"],a:1},
+      {q:"If two triangles are similar, their sides are…",o:["equal","proportional","parallel","perpendicular"],a:1},
+      {q:"Distance of (6, 8) from origin?",o:["10","14","48","7"],a:0},
+      {q:"HCF of 96 and 404?",o:["2","4","8","12"],a:1},
+      {q:"tan 45° + sin 30° = ?",o:["1","1.5","2","√3"],a:1},
+      {q:"A tangent to a circle touches it at…",o:["2 points","1 point","0 points","3 points"],a:1},
+      {q:"Sum of first 20 natural numbers?",o:["190","200","210","220"],a:2},
+      {q:"P(getting 7) when a die is thrown?",o:["1/6","1/7","0","1"],a:2}
+    ],
+    11: [
+      {q:"If A = {1,2,3}, number of subsets?",o:["6","7","8","9"],a:2},
+      {q:"lim(x→2) (x² − 4)/(x − 2) = ?",o:["0","2","4","undefined"],a:2},
+      {q:"Derivative of x⁵?",o:["5x⁴","4x⁵","x⁴","5x⁵"],a:0},
+      {q:"cos(−θ) = ?",o:["−cos θ","cos θ","sin θ","−sin θ"],a:1},
+      {q:"i³ = ?",o:["i","−i","1","−1"],a:1},
+      {q:"ⁿCᵣ = ?",o:["n!/r!(n−r)!","n!/(n−r)!","r!/n!","n!·r!"],a:0},
+      {q:"Slope of line 2x + 3y = 6?",o:["2/3","−2/3","3/2","−3/2"],a:1},
+      {q:"In a GP, a = 2, r = 3. 4th term?",o:["18","24","54","162"],a:2},
+      {q:"P(A ∪ B) = ?",o:["P(A)+P(B)−P(A∩B)","P(A)+P(B)","P(A)·P(B)","P(A)−P(B)"],a:0},
+      {q:"Distance between parallel lines 3x+4y=5 and 3x+4y=15?",o:["1","2","5","10"],a:1}
+    ],
+    12: [
+      {q:"d/dx (sin⁻¹x) = ?",o:["1/√(1−x²)","−1/√(1−x²)","√(1−x²)","1/(1+x²)"],a:0},
+      {q:"∫ tan x dx = ?",o:["ln|sec x| + C","sec²x + C","ln|cos x| + C","tan²x + C"],a:0},
+      {q:"If A is 3×3 and |A| = 5, then |2A| = ?",o:["10","20","40","15"],a:2},
+      {q:"d/dx (e^(2x)) = ?",o:["e^(2x)","2e^(2x)","2eˣ","eˣ"],a:1},
+      {q:"∫₀^(π/2) sin x dx = ?",o:["0","1","π/2","−1"],a:1},
+      {q:"Order of the differential equation y'' + y = 0?",o:["1","2","3","0"],a:1},
+      {q:"If P(A) = 0.4, P(B) = 0.5, A & B independent: P(A∩B)?",o:["0.9","0.2","0.1","0.45"],a:1},
+      {q:"Vector a·b = 0 means the vectors are…",o:["parallel","perpendicular","equal","zero"],a:1},
+      {q:"Max value of sin x + cos x?",o:["1","2","√2","1/√2"],a:2},
+      {q:"∫ 1/(1+x²) dx = ?",o:["tan⁻¹x + C","sin⁻¹x + C","ln(1+x²) + C","1/(1+x²) + C"],a:0}
+    ]
+  },
+
+  /* ================= ICSE (CISCE) ================= */
+  icse: {
+    1: [
+      {q:"What is 4 + 5?",o:["8","9","10","7"],a:1},
+      {q:"Which number comes between 34 and 36?",o:["33","35","37","30"],a:1},
+      {q:"What is 12 − 7?",o:["4","5","6","7"],a:1},
+      {q:"How many sides does a rectangle have?",o:["3","4","5","6"],a:1},
+      {q:"What is 3 + 3 + 3?",o:["6","8","9","10"],a:2},
+      {q:"Write the numeral: 'sixty-two'",o:["26","62","602","60"],a:1},
+      {q:"Which object can roll?",o:["Book","Ball","Box","Dice"],a:1},
+      {q:"What is 1 less than 40?",o:["38","39","41","30"],a:1},
+      {q:"How many tens in 70?",o:["5","6","7","70"],a:2},
+      {q:"Which is heavier: 1 kg of iron or 1 kg of cotton?",o:["Iron","Cotton","Both equal","Neither"],a:2}
+    ],
+    2: [
+      {q:"What is 47 + 28?",o:["65","75","76","85"],a:1},
+      {q:"What is 6 × 2?",o:["8","10","12","14"],a:2},
+      {q:"How many rupees is 150 paise?",o:["₹1.50","₹15","₹150","₹1.05"],a:0},
+      {q:"What is 90 − 45?",o:["35","40","45","55"],a:2},
+      {q:"The smallest 2-digit number is…",o:["9","10","11","99"],a:1},
+      {q:"Which month has 28/29 days?",o:["January","February","March","June"],a:1},
+      {q:"What is half of 14?",o:["6","7","8","9"],a:1},
+      {q:"Pattern: 11, 22, 33, …",o:["34","44","55","43"],a:1},
+      {q:"A cuboid has how many corners (vertices)?",o:["6","8","12","4"],a:1},
+      {q:"What is 200 + 300 + 40?",o:["540","504","450","5,400"],a:0}
+    ],
+    3: [
+      {q:"What is 8 × 8?",o:["56","64","72","81"],a:1},
+      {q:"What is 72 ÷ 8?",o:["7","8","9","10"],a:2},
+      {q:"How many metres in 3 kilometres?",o:["30","300","3,000","30,000"],a:2},
+      {q:"What is 2/5 of 25?",o:["5","10","15","20"],a:1},
+      {q:"Estimate: 49 + 51 ≈ ?",o:["90","100","110","95"],a:1},
+      {q:"What is 625 − 248?",o:["377","387","367","477"],a:0},
+      {q:"Perimeter of a rectangle 10 cm × 4 cm?",o:["14 cm","28 cm","40 cm","24 cm"],a:1},
+      {q:"Which fraction is smallest?",o:["1/2","1/3","1/4","1/5"],a:3},
+      {q:"How many seconds in 2 minutes?",o:["60","100","120","200"],a:2},
+      {q:"What is 15 × 3?",o:["35","40","45","50"],a:2}
+    ],
+    4: [
+      {q:"What is 25 × 25?",o:["525","625","575","650"],a:1},
+      {q:"Factors of 18?",o:["1,2,3,6,9,18","1,2,4,9,18","1,3,6,18","2,3,6,9"],a:0},
+      {q:"What is 7/10 − 3/10?",o:["4/10","10/10","3/10","1/10"],a:0},
+      {q:"Area of a square with side 11 cm?",o:["44 cm²","121 cm²","111 cm²","22 cm²"],a:1},
+      {q:"Write 1.5 as a fraction.",o:["1/5","3/2","15/100","5/1"],a:1},
+      {q:"How many lines of symmetry does a square have?",o:["2","3","4","1"],a:2},
+      {q:"What is 9,999 + 1?",o:["10,000","9,910","1,000","10,001"],a:0},
+      {q:"LCM of 3 and 5?",o:["8","15","30","5"],a:1},
+      {q:"An angle less than 90° is called…",o:["obtuse","right","acute","reflex"],a:2},
+      {q:"What is 6.4 + 3.6?",o:["9","10","10.1","9.9"],a:1}
+    ],
+    5: [
+      {q:"HCF of 24 and 36?",o:["6","8","12","18"],a:2},
+      {q:"What is 45% of 200?",o:["45","80","90","100"],a:2},
+      {q:"Volume of cuboid 5 × 3 × 2?",o:["10","25","30","60"],a:2},
+      {q:"Write 0.08 as a fraction in lowest terms.",o:["8/10","2/25","4/5","1/8"],a:1},
+      {q:"Average of 12, 18, 24, 30?",o:["20","21","24","18"],a:1},
+      {q:"What is 11² ?",o:["111","121","112","122"],a:1},
+      {q:"Angles on a straight line add up to…",o:["90°","180°","270°","360°"],a:1},
+      {q:"Simplify: 5/6 × 3/10",o:["1/4","1/2","15/16","2/3"],a:0},
+      {q:"How many edges does a triangular prism have?",o:["6","9","12","5"],a:1},
+      {q:"Convert 2.5 kg to grams.",o:["250 g","2,500 g","25 g","2,050 g"],a:1}
+    ],
+    6: [
+      {q:"What is (−7) + (−3)?",o:["−10","10","−4","4"],a:0},
+      {q:"Express 45:60 as a ratio in simplest form.",o:["3:4","4:3","9:12","2:3"],a:0},
+      {q:"Solve: 4x = 36",o:["6","8","9","12"],a:2},
+      {q:"Area of parallelogram, base 9, height 6?",o:["54","27","15","45"],a:0},
+      {q:"Smallest prime number?",o:["0","1","2","3"],a:2},
+      {q:"What is 5.6 ÷ 0.8?",o:["0.7","7","70","6.4"],a:1},
+      {q:"Perimeter of a regular pentagon, side 6 cm?",o:["24 cm","30 cm","36 cm","11 cm"],a:1},
+      {q:"Convert 0.125 to a percentage.",o:["1.25%","12.5%","125%","8%"],a:1},
+      {q:"Mode of 2, 3, 3, 5, 3, 7?",o:["2","3","5","7"],a:1},
+      {q:"Sum of angles of a quadrilateral?",o:["180°","270°","360°","540°"],a:2}
+    ],
+    7: [
+      {q:"Solve: 5x − 7 = 18",o:["4","5","6","7"],a:1},
+      {q:"What is (−5) × (−6)?",o:["−30","30","−11","11"],a:1},
+      {q:"By which congruence criterion: two sides & included angle?",o:["SSS","SAS","ASA","RHS"],a:1},
+      {q:"Value of 5³?",o:["15","25","125","75"],a:2},
+      {q:"A shopkeeper buys at ₹80, sells at ₹100. Profit %?",o:["20%","25%","15%","30%"],a:1},
+      {q:"Supplement of 110°?",o:["70°","60°","80°","20°"],a:0},
+      {q:"Area of circle, r = 7 (π = 22/7)?",o:["44 cm²","154 cm²","88 cm²","49 cm²"],a:1},
+      {q:"Range of 3, 8, 12, 5, 20?",o:["12","15","17","20"],a:2},
+      {q:"Simplify: a⁵ ÷ a²",o:["a³","a⁷","a²·⁵","a¹⁰"],a:0},
+      {q:"P(drawing a red card from 52 cards)?",o:["1/4","1/2","1/13","1/26"],a:1}
+    ],
+    8: [
+      {q:"Solve: (x/3) + 2 = 6",o:["9","12","15","6"],a:1},
+      {q:"√225 = ?",o:["13","14","15","25"],a:2},
+      {q:"Factorise: x² − 9",o:["(x−3)(x+3)","(x−9)(x+1)","(x−3)²","(x+3)²"],a:0},
+      {q:"Cube root of 1,000?",o:["10","100","30","1"],a:0},
+      {q:"CI on ₹5,000 at 10% p.a. for 2 years?",o:["₹1,000","₹1,050","₹1,100","₹500"],a:1},
+      {q:"(a − b)² = ?",o:["a² − b²","a² − 2ab + b²","a² + 2ab + b²","a² + b²"],a:1},
+      {q:"Area of rhombus, diagonals 10 and 8?",o:["80","40","18","36"],a:1},
+      {q:"10⁻² = ?",o:["−20","0.01","0.1","−100"],a:1},
+      {q:"Each interior angle of a regular hexagon?",o:["108°","120°","135°","90°"],a:1},
+      {q:"Marked price ₹500, discount 10%. Selling price?",o:["₹450","₹490","₹400","₹475"],a:0}
+    ],
+    9: [
+      {q:"If p(x) = x² − 4, then p(2) = ?",o:["0","2","4","−4"],a:0},
+      {q:"In a right triangle, hypotenuse 13, one leg 5. Other leg?",o:["8","10","12","√194"],a:2},
+      {q:"(16)^(3/4) = ?",o:["4","6","8","12"],a:2},
+      {q:"The mid-point of (2, 4) and (6, 8)?",o:["(4, 6)","(3, 5)","(8, 12)","(2, 2)"],a:0},
+      {q:"Heron's formula uses…",o:["perimeter","semi-perimeter","area only","circumference"],a:1},
+      {q:"Rationalise: 3/√3",o:["√3","3√3","1/√3","3"],a:0},
+      {q:"Point (0, −5) lies on…",o:["x-axis","y-axis","origin","quadrant III"],a:1},
+      {q:"If 2x + 3y = 12 and x = 0, then y = ?",o:["3","4","6","12"],a:1},
+      {q:"TSA of a cube with edge 5 cm?",o:["125 cm²","150 cm²","100 cm²","25 cm²"],a:1},
+      {q:"Two coins tossed. P(both heads)?",o:["1/2","1/3","1/4","1/8"],a:2}
+    ],
+    10: [
+      {q:"Discriminant of x² + 4x + 4 = 0?",o:["0","4","8","16"],a:0},
+      {q:"Sum of first 15 terms of AP 1, 3, 5, …?",o:["225","196","210","240"],a:0},
+      {q:"If sin θ = 3/5, then cos θ = ?",o:["4/5","3/4","5/4","1/5"],a:0},
+      {q:"In similar triangles, ratio of areas = ?",o:["ratio of sides","square of ratio of sides","cube of ratio","equal always"],a:1},
+      {q:"Section formula divides a line in ratio m:n using…",o:["(mx₂+nx₁)/(m+n) etc.","(x₁+x₂)/2 only","Pythagoras","slope formula"],a:0},
+      {q:"Remainder when x² + 1 is divided by x − 1?",o:["0","1","2","−1"],a:2},
+      {q:"sec²θ − tan²θ = ?",o:["0","1","2","sin²θ"],a:1},
+      {q:"Angle between tangent and radius at point of contact?",o:["45°","60°","90°","180°"],a:2},
+      {q:"If 3, x, 27 are in GP, x = ?",o:["9","12","15","6"],a:0},
+      {q:"A card is drawn from 52 cards. P(king)?",o:["1/13","1/4","4/13","1/52"],a:0}
+    ]
+  }
+};
+
+/* ============================================================ */
+const boardScreen = document.getElementById('board-screen');
+const gradeScreen = document.getElementById('grade-screen');
+const quizScreen  = document.getElementById('quiz-screen');
+const resultsScreen = document.getElementById('results-screen');
+const gradeGrid = document.getElementById('grade-grid');
+const startBtn = document.getElementById('start-btn');
+const nextBtn = document.getElementById('next-btn');
+
+let board = null, grade = null, questions = [], idx = 0, picked = null, answers = [];
+
+const BOARD_NAMES = { intl: "🌍 International", cbse: "🇮🇳 CBSE", icse: "🇮🇳 ICSE" };
+const GRADE_WORD = { intl: "Grade", cbse: "Class", icse: "Class" };
+
+function show(el) {
+  [boardScreen, gradeScreen, quizScreen, resultsScreen].forEach(s => s.classList.add('hidden'));
+  el.classList.remove('hidden');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+/* Step 1: board buttons */
+document.querySelectorAll('.board-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    board = btn.dataset.board;
+    grade = null;
+    buildGradeGrid();
+    show(gradeScreen);
+  });
+});
+
+document.getElementById('back-to-boards').addEventListener('click', () => show(boardScreen));
+
+/* Step 2: grades */
+function buildGradeGrid() {
+  gradeGrid.innerHTML = '';
+  document.getElementById('grade-label').textContent = GRADE_WORD[board].toLowerCase();
+  const grades = Object.keys(BANKS[board]).map(Number).sort((a,b) => a - b);
+  grades.forEach(g => {
+    const b = document.createElement('button');
+    b.className = 'grade-btn';
+    b.textContent = `${GRADE_WORD[board]} ${g}`;
+    b.addEventListener('click', () => {
+      grade = g;
+      gradeGrid.querySelectorAll('.grade-btn').forEach(x => x.classList.remove('selected'));
+      b.classList.add('selected');
+      startBtn.disabled = false;
+    });
+    gradeGrid.appendChild(b);
+  });
+  startBtn.disabled = true;
+}
+
+startBtn.addEventListener('click', () => {
+  questions = BANKS[board][grade];
+  idx = 0; answers = [];
+  document.getElementById('q-board').textContent = `${BOARD_NAMES[board]} · ${GRADE_WORD[board]} ${grade}`;
+  show(quizScreen);
+  renderQuestion();
+});
+
+/* Step 3: quiz */
+function renderQuestion() {
+  const q = questions[idx];
+  picked = null;
+  nextBtn.disabled = true;
+  nextBtn.textContent = idx === questions.length - 1 ? 'Finish ✔' : 'Next ▶';
+  document.getElementById('q-counter').textContent = `Question ${idx + 1} of ${questions.length}`;
+  document.getElementById('progress-bar').style.width = `${(idx / questions.length) * 100}%`;
+  document.getElementById('q-text').textContent = q.q;
+  const box = document.getElementById('q-options');
+  box.innerHTML = '';
+  q.o.forEach((opt, i) => {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.textContent = opt;
+    b.addEventListener('click', () => {
+      picked = i;
+      box.querySelectorAll('.opt').forEach(x => x.classList.remove('picked'));
+      b.classList.add('picked');
+      nextBtn.disabled = false;
+    });
+    box.appendChild(b);
+  });
+}
+
+nextBtn.addEventListener('click', () => {
+  answers.push(picked);
+  if (idx < questions.length - 1) { idx++; renderQuestion(); }
+  else showResults();
+});
+
+/* Step 4: results */
+function showResults() {
+  const score = answers.filter((a, i) => a === questions[i].a).length;
+  const pct = Math.round((score / questions.length) * 100);
+  document.getElementById('score-big').textContent = `${score} / ${questions.length} (${pct}%)`;
+  let verdict, cls;
+  if (pct >= 90)      { verdict = "🏆 Outstanding! You're a maths star!"; cls = 'ok'; }
+  else if (pct >= 70) { verdict = "🎉 Great job! Solid understanding.";   cls = 'ok'; }
+  else if (pct >= 50) { verdict = "👍 Good effort — keep practising!";    cls = '';  }
+  else                { verdict = "📚 Keep going — practice makes perfect!"; cls = 'no'; }
+  const v = document.getElementById('verdict');
+  v.textContent = verdict;
+  v.className = 'verdict ' + cls;
+
+  const review = document.getElementById('review');
+  review.innerHTML = '';
+  questions.forEach((q, i) => {
+    const correct = answers[i] === q.a;
+    const div = document.createElement('div');
+    div.className = 'review-item';
+    div.innerHTML =
+      `<div class="q">${i + 1}. ${q.q} <span class="tag">${correct ? '✓ correct' : '✗ wrong'}</span></div>` +
+      `<div class="${correct ? 'ok' : 'no'}">Your answer: ${q.o[answers[i]] ?? '—'}</div>` +
+      (correct ? '' : `<div class="ok">Correct answer: ${q.o[q.a]}</div>`);
+    review.appendChild(div);
+  });
+  show(resultsScreen);
+}
+
+document.getElementById('retry-btn').addEventListener('click', () => {
+  idx = 0; answers = [];
+  show(quizScreen);
+  renderQuestion();
+});
+document.getElementById('change-btn').addEventListener('click', () => show(boardScreen));
+</script>
+</body>
+</html>

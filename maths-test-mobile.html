@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Maths Test — All Grades</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 32px;
+    width: 100%;
+    max-width: 640px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.4);
+  }
+  h1 { font-size: 1.6rem; margin-bottom: 8px; color: #38bdf8; }
+  h2 { font-size: 1.2rem; margin-bottom: 16px; }
+  p.sub { color: #94a3b8; margin-bottom: 24px; }
+  .grades { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  button {
+    cursor: pointer;
+    border: 1px solid #475569;
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 1rem;
+    transition: all .15s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:hover, button:active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
+  .question { font-size: 1.25rem; margin: 16px 0 24px; font-weight: 600; }
+  .options { display: grid; gap: 10px; }
+  .options button { text-align: left; padding: 14px 16px; min-height: 48px; }
+  .options button.correct { background: #16a34a; border-color: #16a34a; color: #fff; }
+  .options button.wrong { background: #dc2626; border-color: #dc2626; color: #fff; }
+  .progress { color: #94a3b8; font-size: .9rem; margin-bottom: 8px; }
+  .bar { height: 6px; background: #334155; border-radius: 3px; overflow: hidden; margin-bottom: 20px; }
+  .bar > div { height: 100%; background: #38bdf8; transition: width .3s; }
+  .score { font-size: 2.4rem; font-weight: 700; color: #38bdf8; text-align: center; margin: 16px 0; }
+  .verdict { text-align: center; font-size: 1.1rem; margin-bottom: 24px; color: #94a3b8; }
+  .review { text-align: left; margin: 16px 0 24px; max-height: 260px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .review li { margin-bottom: 10px; font-size: .9rem; list-style: none; padding: 10px; background: #0f172a; border-radius: 8px; }
+  .review .ok { color: #4ade80; }
+  .review .bad { color: #f87171; }
+  .actions { display: flex; gap: 10px; }
+  .actions button { flex: 1; min-height: 48px; }
+
+  /* ---------- Mobile ---------- */
+  @media (max-width: 480px) {
+    body { padding: 12px; align-items: flex-start; }
+    .card {
+      padding: 20px 16px;
+      border-radius: 12px;
+      max-width: none;
+    }
+    h1 { font-size: 1.35rem; }
+    h2 { font-size: 1.05rem; }
+    .grades { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .grades button { padding: 14px 6px; min-height: 48px; font-size: .95rem; }
+    .question { font-size: 1.15rem; }
+    .options button { padding: 14px; font-size: 1rem; }
+    .score { font-size: 2rem; }
+    .verdict { font-size: 1rem; }
+    .review { max-height: 45vh; }
+    .review li { font-size: .85rem; }
+    .actions { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="card" id="app"></div>
+
+<script>
+// ---------- Question banks (10 questions per grade, Grades 1–12) ----------
+// Each question: { q: "question text", a: correctAnswer, o: [options] }
+const BANKS = {
+  1: [
+    { q: "3 + 4 = ?", a: 7 }, { q: "9 - 5 = ?", a: 4 }, { q: "2 + 6 = ?", a: 8 },
+    { q: "10 - 3 = ?", a: 7 }, { q: "5 + 5 = ?", a: 10 }, { q: "8 - 2 = ?", a: 6 },
+    { q: "1 + 9 = ?", a: 10 }, { q: "7 - 4 = ?", a: 3 }, { q: "6 + 2 = ?", a: 8 },
+    { q: "Which number is bigger: 12 or 9?", a: 12 }
+  ],
+  2: [
+    { q: "15 + 7 = ?", a: 22 }, { q: "20 - 8 = ?", a: 12 }, { q: "6 + 13 = ?", a: 19 },
+    { q: "25 - 10 = ?", a: 15 }, { q: "9 + 9 = ?", a: 18 }, { q: "30 - 12 = ?", a: 18 },
+    { q: "14 + 6 = ?", a: 20 }, { q: "18 - 9 = ?", a: 9 }, { q: "11 + 11 = ?", a: 22 },
+    { q: "Which is even: 7, 9, 12, 15?", a: 12 }
+  ],
+  3: [
+    { q: "7 × 3 = ?", a: 21 }, { q: "36 ÷ 6 = ?", a: 6 }, { q: "45 + 27 = ?", a: 72 },
+    { q: "81 - 38 = ?", a: 43 }, { q: "8 × 4 = ?", a: 32 }, { q: "54 ÷ 9 = ?", a: 6 },
+    { q: "125 + 75 = ?", a: 200 }, { q: "9 × 6 = ?", a: 54 }, { q: "100 - 47 = ?", a: 53 },
+    { q: "Half of 64 = ?", a: 32 }
+  ],
+  4: [
+    { q: "12 × 11 = ?", a: 132 }, { q: "144 ÷ 12 = ?", a: 12 }, { q: "3/4 of 20 = ?", a: 15 },
+    { q: "256 + 378 = ?", a: 634 }, { q: "900 - 456 = ?", a: 444 }, { q: "15 × 6 = ?", a: 90 },
+    { q: "0.5 + 0.25 = ?", a: 0.75 }, { q: "7 × 8 = ?", a: 56 }, { q: "96 ÷ 8 = ?", a: 12 },
+    { q: "Round 347 to the nearest ten", a: 350 }
+  ],
+  5: [
+    { q: "25 × 4 = ?", a: 100 }, { q: "2/5 of 50 = ?", a: 20 }, { q: "1.2 + 3.45 = ?", a: 4.65 },
+    { q: "1000 ÷ 8 = ?", a: 125 }, { q: "13² = ?", a: 169 }, { q: "0.75 as a fraction = ?", a: "3/4" },
+    { q: "456 × 2 = ?", a: 912 }, { q: "60% of 50 = ?", a: 30 }, { q: "7.5 - 2.8 = ?", a: 4.7 },
+    { q: "LCM of 4 and 6 = ?", a: 12 }
+  ],
+  6: [
+    { q: "-5 + 12 = ?", a: 7 }, { q: "3/4 ÷ 1/2 = ?", a: "3/2" }, { q: "15% of 200 = ?", a: 30 },
+    { q: "8 × (-3) = ?", a: -24 }, { q: "Solve: x + 7 = 15", a: 8 }, { q: "5² + 3² = ?", a: 34 },
+    { q: "2.4 × 5 = ?", a: 12 }, { q: "GCF of 12 and 18 = ?", a: 6 }, { q: "-10 - (-4) = ?", a: -6 },
+    { q: "Area of rectangle 7 × 9 = ?", a: 63 }
+  ],
+  7: [
+    { q: "Solve: 2x = 18", a: 9 }, { q: "-7 × 6 = ?", a: -42 }, { q: "3/5 + 1/5 = ?", a: "4/5" },
+    { q: "20% of 150 = ?", a: 30 }, { q: "√81 = ?", a: 9 }, { q: "Solve: x - 9 = 4", a: 13 },
+    { q: "(-4)² = ?", a: 16 }, { q: "0.125 as a fraction = ?", a: "1/8" }, { q: "7! / 6! = ?", a: 7 },
+    { q: "Circumference of circle, r=7 (use π≈22/7)", a: 44 }
+  ],
+  8: [
+    { q: "Solve: 3x + 5 = 20", a: 5 }, { q: "Slope between (0,0) and (4,8) = ?", a: 2 },
+    { q: "2³ × 2² = ?", a: 32 }, { q: "√144 = ?", a: 12 }, { q: "Solve: x/4 = 7", a: 28 },
+    { q: "(-3)³ = ?", a: -27 }, { q: "Pythagoras: legs 3 and 4, hypotenuse = ?", a: 5 },
+    { q: "5⁻¹ = ?", a: "1/5" }, { q: "Expand: 2(x + 6)", a: "2x+12" }, { q: "1.5 × 1.5 = ?", a: 2.25 }
+  ],
+  9: [
+    { q: "Factor: x² + 5x + 6", a: "(x+2)(x+3)" }, { q: "Solve: x² = 49", a: "±7" },
+    { q: "Slope of y = 3x + 2", a: 3 }, { q: "√50 simplified = ?", a: "5√2" },
+    { q: "Solve: 2x - 7 = 11", a: 9 }, { q: "(x + 3)² = ?", a: "x²+6x+9" },
+    { q: "y-intercept of y = 2x - 5", a: -5 }, { q: "Solve: x² - 9 = 0", a: "±3" },
+    { q: "3² × 3³ = ?", a: 243 }, { q: "Midpoint of (2,4) and (6,10)", a: "(4,7)" }
+  ],
+  10: [
+    { q: "sin 30° = ?", a: "1/2" }, { q: "Solve: x² - 5x + 6 = 0", a: "2,3" },
+    { q: "log₁₀(1000) = ?", a: 3 }, { q: "cos 60° = ?", a: "1/2" },
+    { q: "Discriminant of x² + 4x + 4", a: 0 }, { q: "tan 45° = ?", a: 1 },
+    { q: "2ⁿ = 32, n = ?", a: 5 }, { q: "Sum of angles in a triangle = ?", a: 180 },
+    { q: "If f(x)=x², f(5) = ?", a: 25 }, { q: "√(16×9) = ?", a: 12 }
+  ],
+  11: [
+    { q: "d/dx (x³) = ?", a: "3x²" }, { q: "log₂(16) = ?", a: 4 },
+    { q: "lim x→0 (sin x / x) = ?", a: 1 }, { q: "d/dx (sin x) = ?", a: "cos x" },
+    { q: "∫ 2x dx = ?", a: "x²+C" }, { q: "e⁰ = ?", a: 1 },
+    { q: "d/dx (eˣ) = ?", a: "eˣ" }, { q: "5C2 (combinations) = ?", a: 10 },
+    { q: "ln(e³) = ?", a: 3 }, { q: "d/dx (5x) = ?", a: 5 }
+  ],
+  12: [
+    { q: "∫ x² dx = ?", a: "x³/3+C" }, { q: "d/dx (ln x) = ?", a: "1/x" },
+    { q: "lim x→∞ (1/x) = ?", a: 0 }, { q: "d/dx (cos x) = ?", a: "-sin x" },
+    { q: "∫₀¹ 2x dx = ?", a: 1 }, { q: "i² (imaginary unit) = ?", a: -1 },
+    { q: "d/dx (x·eˣ) = ?", a: "eˣ(x+1)" }, { q: "Σ of first 10 natural numbers = ?", a: 55 },
+    { q: "det of [[1,2],[3,4]] = ?", a: -2 }, { q: "∫ 1/x dx = ?", a: "ln|x|+C" }
+  ]
+};
+
+// Build 4 options per question (3 distractors + correct answer)
+function makeOptions(answer) {
+  const opts = new Set([String(answer)]);
+  let guard = 0;
+  while (opts.size < 4 && guard++ < 200) {
+    let fake;
+    if (typeof answer === "number") {
+      const delta = Math.max(1, Math.round(Math.abs(answer) * 0.2));
+      fake = String(answer + (Math.random() < 0.5 ? -1 : 1) * (delta + Math.floor(Math.random() * 3)));
+    } else {
+      fake = String(answer) + Math.floor(Math.random() * 3 + 1); // e.g. "3/4" -> "3/42"
+      if (opts.has(fake)) fake = String(answer).split("").reverse().join("");
+    }
+    if (fake !== String(answer)) opts.add(fake);
+  }
+  return [...opts].sort(() => Math.random() - 0.5);
+}
+
+// ---------- App state ----------
+const app = document.getElementById("app");
+let grade = null, questions = [], idx = 0, score = 0, answers = [];
+
+function showGradeSelect() {
+  app.innerHTML = `
+    <h1>Maths Test</h1>
+    <p class="sub">Pick your grade to start a 10-question test made for your level.</p>
+    <div class="grades">
+      ${Array.from({ length: 12 }, (_, i) =>
+        `<button onclick="startTest(${i + 1})">Grade ${i + 1}</button>`).join("")}
+    </div>`;
+}
+
+function startTest(g) {
+  grade = g;
+  questions = BANKS[g].map(q => ({ ...q, options: makeOptions(q.a) }));
+  idx = 0; score = 0; answers = [];
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = questions[idx];
+  app.innerHTML = `
+    <div class="progress">Grade ${grade} · Question ${idx + 1} of ${questions.length}</div>
+    <div class="bar"><div style="width:${(idx / questions.length) * 100}%"></div></div>
+    <div class="question">${q.q}</div>
+    <div class="options">
+      ${q.options.map(o => `<button onclick="answer(this, '${String(o).replace(/'/g, "\\'")}')">${o}</button>`).join("")}
+    </div>`;
+}
+
+function answer(btn, chosen) {
+  const q = questions[idx];
+  const correct = String(chosen) === String(q.a);
+  if (correct) score++;
+  answers.push({ q: q.q, chosen, correct: q.a, ok: correct });
+
+  // Highlight right/wrong, then advance
+  [...app.querySelectorAll(".options button")].forEach(b => {
+    b.disabled = true;
+    if (b.textContent === String(q.a)) b.classList.add("correct");
+  });
+  if (!correct) btn.classList.add("wrong");
+
+  setTimeout(() => {
+    idx++;
+    idx < questions.length ? showQuestion() : showResults();
+  }, 900);
+}
+
+function showResults() {
+  const pct = Math.round((score / questions.length) * 100);
+  const verdict =
+    pct >= 90 ? "Outstanding! You've mastered this level. 🏆" :
+    pct >= 70 ? "Great job — solid understanding!" :
+    pct >= 50 ? "Not bad — a bit more practice will help." :
+                "Keep practising — you'll get there!";
+  app.innerHTML = `
+    <h1>Your Results — Grade ${grade}</h1>
+    <div class="score">${score} / ${questions.length} (${pct}%)</div>
+    <div class="verdict">${verdict}</div>
+    <h2>Review</h2>
+    <ul class="review">
+      ${answers.map(a => `
+        <li>
+          <div>${a.q}</div>
+          <div class="${a.ok ? "ok" : "bad"}">
+            ${a.ok ? "✓ Correct: " + a.chosen : "✗ You said " + a.chosen + " — correct answer: " + a.correct}
+          </div>
+        </li>`).join("")}
+    </ul>
+    <div class="actions">
+      <button onclick="startTest(${grade})">Retry Grade ${grade}</button>
+      <button onclick="showGradeSelect()">Change Grade</button>
+    </div>`;
+}
+
+showGradeSelect();
+</script>
+</body>
+</html>
